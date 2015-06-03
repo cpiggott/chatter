@@ -1,5 +1,6 @@
 package io.bigbang.chatter.chatter;
 
+import android.content.Context;
 import android.os.Handler;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -14,6 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.os.Build;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -102,6 +104,7 @@ public class MainActivity extends ActionBarActivity {
             if(editTextName.equals("") || editTextName.length() < 1){
                 Toast.makeText(getActivity(), "Username must be longer than one character", Toast.LENGTH_SHORT).show();
             } else {
+                hideKeyboard();
                 Fragment newFragment = ChatFragment.newInstance(editTextName.getText().toString());
                 FragmentManager manager = getActivity().getSupportFragmentManager();
                 FragmentTransaction transaction = getFragmentManager().beginTransaction();
@@ -114,25 +117,19 @@ public class MainActivity extends ActionBarActivity {
 
         }
 
-        private void initializeChat() {
-            final Handler bigBangHandler = new Handler(getActivity().getMainLooper());
-            BigBangClient client = new AndroidBigBangClient(new Action<Runnable>() {
-                @Override
-                public void result(Runnable result){
-                    bigBangHandler.post(result);
-                }
-            });
 
-            client.connect("https://chatter.bigbang.io", new Action<ConnectionError>() {
-                @Override
-                public void result(ConnectionError error) {
-                    if (error != null) {
-                        Log.i("bigbang", error.getMessage());
-                    } else {
-                        Log.i("bigbang", "Connected!");
-                    }
-                }
-            });
+
+        /**
+         * Hides the keyboard. Helpful for instances where the previous
+         * fragment has the keyboard open and utilizes the 'Done' key.
+         */
+        private void hideKeyboard() {
+            // Check if no view has focus:
+            View view = getActivity().getCurrentFocus();
+            if (view != null) {
+                InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                inputManager.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+            }
         }
     }
 }

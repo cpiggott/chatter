@@ -1,12 +1,16 @@
 package io.bigbang.chatter.chatter;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -19,6 +23,16 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import io.bigbang.client.Action;
+import io.bigbang.client.Action2;
+import io.bigbang.client.AndroidBigBangClient;
+import io.bigbang.client.BigBangClient;
+import io.bigbang.client.Channel;
+import io.bigbang.client.ChannelError;
+import io.bigbang.client.ChannelMessage;
+import io.bigbang.client.ConnectionError;
+import io.bigbang.protocol.JsonObject;
 
 
 /**
@@ -53,6 +67,9 @@ public class ChatFragment extends Fragment implements AbsListView.OnItemClickLis
     private String message;
     private EditText messageEditText;
     private Button sendButton;
+
+    private Channel chatChannel;
+    private BigBangClient client;
 
     // TODO: Rename and change types of parameters
     public static ChatFragment newInstance(String username) {
@@ -139,6 +156,18 @@ public class ChatFragment extends Fragment implements AbsListView.OnItemClickLis
         }
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        initializeChat();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        client.disconnect();
+    }
+
     /**
      * The default content for this Fragment has a TextView that is shown when
      * the list is empty. If you would like to change the text, call this method
@@ -157,10 +186,71 @@ public class ChatFragment extends Fragment implements AbsListView.OnItemClickLis
         if(message.equals("") || message == null){
             Toast.makeText(getActivity(), "Message cannot be empty", Toast.LENGTH_SHORT ).show();
         } else {
-            mAdapter.add(new Message(message, mUsername));
-            mAdapter.notifyDataSetChanged();
+
+            messageEditText.setText("");//Sets the editText to empty for a new message
+
+            JsonObject json = new JsonObject();
+            json.putString("message", message);
+            json.putString("sender", mUsername);
+            chatChannel.publish(json);
         }
     }
+
+    private void updateChatWindow(String message, String username){
+
+        mAdapter.add(new Message(message, username));
+        mAdapter.notifyDataSetChanged();
+
+    }
+
+    private void initializeChat() {
+
+        //getActivity().getActionBar().setTitle("Connecting...");
+
+        final Handler bigBangHandler = new Handler(getActivity().getMainLooper());
+        client = new AndroidBigBangClient(new Action<Runnable>() {
+            @Override
+            public void result(Runnable result){
+                bigBangHandler.post(result);
+            }
+        });
+
+        client.connect("https://chatter.bigbang.io", new Action<ConnectionError>() {
+            @Override
+            public void result(ConnectionError error) {
+                if (error != null) {
+                    Log.i("bigbang", error.getMessage());
+                    messageEditText.setEnabled(false);
+
+                } else {
+                    Log.i("bigbang", "Connected!");
+                    //getActivity().getActionBar().setTitle("Connected!");
+                    messageEditText.setEnabled(true);
+                    client.subscribe("helloChat", new Action2<ChannelError, Channel>() {
+                        @Override
+                        public void result(ChannelError channelError, Channel channel) {
+                            chatChannel = channel;
+                            channel.onMessage(new Action<ChannelMessage>() {
+                                @Override
+                                public void result(ChannelMessage result) {
+                                    JsonObject json = result.getPayload().getBytesAsJSON().asObject();
+                                    updateChatWindow(json.getString("message"), json.getString("sender"));
+                                }
+                            });
+                        }
+                    });
+                }
+            }
+        });
+
+        client.disconnected(new Action<Void>() {
+            @Override
+            public void result(Void result) {
+                //getActivity().getActionBar().setTitle("DISCONNECTED");
+            }
+        });
+    }
+
 
     /**
      * This interface must be implemented by activities that contain this
