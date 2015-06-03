@@ -100,7 +100,7 @@ public class MainActivity extends ActionBarActivity {
         */
         private void OnEnterChatClick(){
             if(editTextName.equals("") || editTextName.length() < 1){
-                Toast.makeText(getActivity(), "Username must be lenger than one character", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "Username must be longer than one character", Toast.LENGTH_SHORT).show();
             } else {
                 Fragment newFragment = ChatFragment.newInstance(editTextName.getText().toString());
                 FragmentManager manager = getActivity().getSupportFragmentManager();

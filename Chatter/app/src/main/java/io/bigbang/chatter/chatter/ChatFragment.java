@@ -1,20 +1,25 @@
 package io.bigbang.chatter.chatter;
 
 import android.app.Activity;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
-import io.bigbang.chatter.chatter.dummy.DummyContent;
+import java.util.ArrayList;
+import java.util.List;
+
 
 /**
  * A fragment representing a list of Items.
@@ -27,14 +32,8 @@ import io.bigbang.chatter.chatter.dummy.DummyContent;
  */
 public class ChatFragment extends Fragment implements AbsListView.OnItemClickListener {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private List<Message> mMessages;
 
     private OnFragmentInteractionListener mListener;
 
@@ -42,20 +41,25 @@ public class ChatFragment extends Fragment implements AbsListView.OnItemClickLis
      * The fragment's ListView/GridView.
      */
     private AbsListView mListView;
-    private static String userName;
 
     /**
      * The Adapter which will be used to populate the ListView/GridView with
      * Views.
      */
-    private ListAdapter mAdapter;
+    private MessageAdapter mAdapter;
+
+    private static String mUsername;
+
+    private String message;
+    private EditText messageEditText;
+    private Button sendButton;
 
     // TODO: Rename and change types of parameters
     public static ChatFragment newInstance(String username) {
         ChatFragment fragment = new ChatFragment();
+        mUsername = username;
         Bundle args = new Bundle();
         fragment.setArguments(args);
-        userName = username;//Set the username of the current user
         return fragment;
     }
 
@@ -70,14 +74,15 @@ public class ChatFragment extends Fragment implements AbsListView.OnItemClickLis
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+        mMessages = new ArrayList<Message>();
+        Resources resources = getResources();
+
+        mMessages.add(new Message("Welcome to the Chat", "ChatBot"));
 
         // TODO: Change Adapter to display your content
-        mAdapter = new ArrayAdapter<DummyContent.DummyItem>(getActivity(),
-                android.R.layout.simple_list_item_1, android.R.id.text1, DummyContent.ITEMS);
+        mAdapter = new MessageAdapter(getActivity(), mMessages);
+
+
     }
 
     @Override
@@ -89,8 +94,19 @@ public class ChatFragment extends Fragment implements AbsListView.OnItemClickLis
         mListView = (AbsListView) view.findViewById(android.R.id.list);
         ((AdapterView<ListAdapter>) mListView).setAdapter(mAdapter);
 
+
         // Set OnItemClickListener so we can be notified on item clicks
         mListView.setOnItemClickListener(this);
+
+        messageEditText = (EditText) view.findViewById(R.id.etChatText);
+        sendButton = (Button) view.findViewById(R.id.buttonSend);
+
+        sendButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SendMessage();
+            }
+        });
 
         return view;
     }
@@ -98,12 +114,13 @@ public class ChatFragment extends Fragment implements AbsListView.OnItemClickLis
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-//        try {
-//            mListener = (OnFragmentInteractionListener) activity;
-//        } catch (ClassCastException e) {
+        try {
+            mListener = (OnFragmentInteractionListener) activity;
+        } catch (ClassCastException e) {
 //            throw new ClassCastException(activity.toString()
+//                    + " must implement OnFragmentInteractionListener");throw new ClassCastException(activity.toString()
 //                    + " must implement OnFragmentInteractionListener");
-//        }
+        }
     }
 
     @Override
@@ -118,7 +135,7 @@ public class ChatFragment extends Fragment implements AbsListView.OnItemClickLis
         if (null != mListener) {
             // Notify the active callbacks interface (the activity, if the
             // fragment is attached to one) that an item has been selected.
-            mListener.onFragmentInteraction(DummyContent.ITEMS.get(position).id);
+           // mListener.onFragmentInteraction(DummyContent.ITEMS.get(position).id);
         }
     }
 
@@ -135,6 +152,16 @@ public class ChatFragment extends Fragment implements AbsListView.OnItemClickLis
         }
     }
 
+    private void SendMessage(){
+        message = messageEditText.getText().toString();
+        if(message.equals("") || message == null){
+            Toast.makeText(getActivity(), "Message cannot be empty", Toast.LENGTH_SHORT ).show();
+        } else {
+            mAdapter.add(new Message(message, mUsername));
+            mAdapter.notifyDataSetChanged();
+        }
+    }
+
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
@@ -147,7 +174,9 @@ public class ChatFragment extends Fragment implements AbsListView.OnItemClickLis
      */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        public void onFragmentInteraction(String id);
+        public void onFragmentInteraction(String username);
     }
+
+
 
 }
