@@ -94,10 +94,10 @@ public class ChatFragment extends Fragment implements AbsListView.OnItemClickLis
         mMessages = new ArrayList<Message>();
         Resources resources = getResources();
 
-        mMessages.add(new Message("Welcome to the Chat", "ChatBot"));
+        mMessages.add(new Message("Welcome to the chat " + mUsername + "!", "ChatBot"));
 
         // TODO: Change Adapter to display your content
-        mAdapter = new MessageAdapter(getActivity(), mMessages);
+        mAdapter = new MessageAdapter(getActivity(), mMessages, mUsername);
 
 
     }
@@ -201,7 +201,6 @@ public class ChatFragment extends Fragment implements AbsListView.OnItemClickLis
     private void updateChatWindow(String message, String username){
         mAdapter.add(new Message(message, username));
         mAdapter.notifyDataSetChanged();
-        
     }
 
     private void initializeChat() {
