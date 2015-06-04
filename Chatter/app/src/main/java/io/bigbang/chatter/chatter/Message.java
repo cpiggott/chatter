@@ -1,5 +1,7 @@
 package io.bigbang.chatter.chatter;
 
+import android.graphics.Color;
+
 import java.util.Date;
 
 /**
@@ -9,11 +11,13 @@ public class Message {
     private String body;
     private Date date;
     private String sender;
+    private int color;
 
-    public Message(String messageBody, String sender){
+    public Message(String messageBody, String sender, int color){
         this.body = messageBody;
         this.date = new Date();
         this.sender = sender;
+        this.color = color;
     }
 
     public void setBody(String messageBody){
@@ -35,4 +39,12 @@ public class Message {
     public Date getDate(){
         return this.date;
     }
+
+    public void setColor(int color){
+        this.color = color;
+    }
+    public int getColor() {
+        return color;
+    }
+
 }

@@ -3,6 +3,7 @@ package io.bigbang.chatter.chatter;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
@@ -64,6 +65,7 @@ public class ChatFragment extends Fragment implements AbsListView.OnItemClickLis
     private MessageAdapter mAdapter;
 
     private static String mUsername;
+    private static int mColor;
 
     private String message;
     private EditText messageEditText;
@@ -75,9 +77,10 @@ public class ChatFragment extends Fragment implements AbsListView.OnItemClickLis
     private Vibrator vibrator;
 
     // TODO: Rename and change types of parameters
-    public static ChatFragment newInstance(String username) {
+    public static ChatFragment newInstance(String username, int color) {
         ChatFragment fragment = new ChatFragment();
         mUsername = username;
+        mColor = color;
         Bundle args = new Bundle();
         fragment.setArguments(args);
         return fragment;
@@ -197,22 +200,25 @@ public class ChatFragment extends Fragment implements AbsListView.OnItemClickLis
             JsonObject json = new JsonObject();
             json.putString("message", message);
             json.putString("sender", mUsername);
+            json.putNumber("color", mColor);
 
             chatChannel.publish(json);
         }
     }
 
+    //Sends a message that a specific user has connected to everyone.
     private void SendConnect(){
         JsonObject json = new JsonObject();
         json.putString("message", mUsername + " has joined the chat.");
         json.putString("sender", "BobBot");
+        json.putNumber("color", Color.BLACK);
 
 
         chatChannel.publish(json);
     }
 
-    private void updateChatWindow(String message, String username){
-        mAdapter.add(new Message(message, username));
+    private void updateChatWindow(String message, String username, int color){
+        mAdapter.add(new Message(message, username, color));
         mAdapter.notifyDataSetChanged();
         vibrator.vibrate(500);//TODO: Might want to move this
     }
@@ -256,7 +262,7 @@ public class ChatFragment extends Fragment implements AbsListView.OnItemClickLis
                                 @Override
                                 public void result(ChannelMessage result) {
                                     JsonObject json = result.getPayload().getBytesAsJSON().asObject();
-                                    updateChatWindow(json.getString("message"), json.getString("sender"));
+                                    updateChatWindow(json.getString("message"), json.getString("sender"), json.getInteger("color"));
                                 }
                             });
                         }

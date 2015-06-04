@@ -1,6 +1,7 @@
 package io.bigbang.chatter.chatter;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Handler;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -19,6 +20,8 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import java.util.Random;
 
 import io.bigbang.client.Action;
 import io.bigbang.client.AndroidBigBangClient;
@@ -73,6 +76,7 @@ public class MainActivity extends ActionBarActivity {
 
         EditText editTextName;
         Button buttonEnterChat;
+        int[] colors = {Color.RED, Color.GREEN, Color.BLUE, Color.YELLOW, Color.CYAN, Color.MAGENTA, };
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -83,11 +87,11 @@ public class MainActivity extends ActionBarActivity {
             buttonEnterChat = (Button) rootView.findViewById(R.id.buttonEnterChat);
 
             buttonEnterChat.setOnClickListener(new View.OnClickListener() {
-               @Override
-               public void onClick(View v) {
-                   OnEnterChatClick();
-               }
-           });
+                @Override
+                public void onClick(View v) {
+                    OnEnterChatClick();
+                }
+            });
 
             return rootView;
         }
@@ -101,20 +105,22 @@ public class MainActivity extends ActionBarActivity {
         * @Description: Called when the Enter Chat button is clicked. Opens a new fragment with the chat.
         */
         private void OnEnterChatClick(){
+
+
             if(editTextName.equals("") || editTextName.length() < 1){
                 Toast.makeText(getActivity(), "Username must be longer than one character", Toast.LENGTH_SHORT).show();
             } else if(editTextName.getText().toString().toLowerCase().equals("bobbot")){
                 Toast.makeText(getActivity(), "Invalid Username! BobBot is reserved!", Toast.LENGTH_SHORT).show();
             } else {
+                Random r = new Random();
                 hideKeyboard();
-                Fragment newFragment = ChatFragment.newInstance(editTextName.getText().toString());
+                Fragment newFragment = ChatFragment.newInstance(editTextName.getText().toString(), colors[r.nextInt(5)]);
                 FragmentManager manager = getActivity().getSupportFragmentManager();
                 FragmentTransaction transaction = getFragmentManager().beginTransaction();
                 transaction.replace(R.id.container, newFragment);
                 transaction.addToBackStack("enter");
                 manager.popBackStack();
                 transaction.commit();
-
             }
 
         }

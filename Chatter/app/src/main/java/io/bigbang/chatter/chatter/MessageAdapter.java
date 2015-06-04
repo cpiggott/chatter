@@ -59,6 +59,7 @@ public class MessageAdapter extends ArrayAdapter<Message> {
             convertView.setTag(viewHolder);
         }
 
+        viewHolder.tvSender.setTextColor(message.getColor());
         viewHolder.tvBody.setText(message.getBody());
         viewHolder.tvSender.setText(message.getSender());
 

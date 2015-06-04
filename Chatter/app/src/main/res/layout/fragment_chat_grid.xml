@@ -4,7 +4,11 @@
     android:layout_height="match_parent" tools:context="io.bigbang.chatter.chatter.ChatFragment">
 
     <ListView android:id="@android:id/list" android:layout_width="match_parent"
-        android:layout_height="521dp" android:numColumns="2" />
+        android:layout_height="521dp" android:numColumns="2"
+        android:transcriptMode="alwaysScroll"
+        android:divider="@null"
+        android:dividerHeight="0dp"
+        />
 
     <TextView android:id="@android:id/empty" android:layout_width="match_parent"
         android:layout_height="532dp" android:gravity="center"

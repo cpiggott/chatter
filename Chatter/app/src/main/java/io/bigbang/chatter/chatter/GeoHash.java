@@ -110,7 +110,7 @@ public class GeoHash {
         double lon[] = new double[3];
         int bit = 0;
         int ch = 0;
-        int precision = 12;
+        int precision = 4;
         String geohash = "";
 
         lat[0] = -90.0;
