@@ -1,12 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent" tools:context="io.bigbang.chatter.chatter.ChatFragment">
 
-    <GridView android:id="@android:id/list" android:layout_width="match_parent"
-        android:layout_height="match_parent" android:numColumns="2" />
+    <ListView android:id="@android:id/list" android:layout_width="match_parent"
+        android:layout_height="521dp" android:numColumns="2" />
 
     <TextView android:id="@android:id/empty" android:layout_width="match_parent"
-        android:layout_height="match_parent" android:gravity="center" />
+        android:layout_height="532dp" android:gravity="center"
+        android:layout_above="@+id/buttonSend"
+        android:transcriptMode="alwaysScroll"
+        android:stackFromBottom="true"/>
 
-</FrameLayout>
+    <EditText
+        android:layout_width="189dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/etChatText"
+        android:layout_gravity="left|bottom"
+        android:layout_below="@android:id/empty"
+        android:layout_alignParentStart="true"
+        android:layout_toStartOf="@+id/buttonSend" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Send"
+        android:id="@+id/buttonSend"
+        android:layout_gravity="center_horizontal|bottom"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true" />
+
+</RelativeLayout>

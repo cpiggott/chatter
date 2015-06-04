@@ -199,10 +199,9 @@ public class ChatFragment extends Fragment implements AbsListView.OnItemClickLis
     }
 
     private void updateChatWindow(String message, String username){
-
         mAdapter.add(new Message(message, username));
         mAdapter.notifyDataSetChanged();
-
+        
     }
 
     private void initializeChat() {
