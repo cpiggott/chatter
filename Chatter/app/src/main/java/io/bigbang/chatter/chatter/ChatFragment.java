@@ -166,6 +166,7 @@ public class ChatFragment extends Fragment implements AbsListView.OnItemClickLis
     public void onPause() {
         super.onPause();
         client.disconnect();
+
     }
 
     /**
@@ -192,6 +193,7 @@ public class ChatFragment extends Fragment implements AbsListView.OnItemClickLis
             JsonObject json = new JsonObject();
             json.putString("message", message);
             json.putString("sender", mUsername);
+
             chatChannel.publish(json);
         }
     }
@@ -206,6 +208,10 @@ public class ChatFragment extends Fragment implements AbsListView.OnItemClickLis
     private void initializeChat() {
 
         //getActivity().getActionBar().setTitle("Connecting...");
+        messageEditText.setEnabled(false);
+        sendButton.setEnabled(false);
+        Toast.makeText(getActivity(), "Connecting...", Toast.LENGTH_SHORT).show();
+
 
         final Handler bigBangHandler = new Handler(getActivity().getMainLooper());
         client = new AndroidBigBangClient(new Action<Runnable>() {
@@ -220,12 +226,15 @@ public class ChatFragment extends Fragment implements AbsListView.OnItemClickLis
             public void result(ConnectionError error) {
                 if (error != null) {
                     Log.i("bigbang", error.getMessage());
-                    messageEditText.setEnabled(false);
 
                 } else {
                     Log.i("bigbang", "Connected!");
                     //getActivity().getActionBar().setTitle("Connected!");
+
+                    Toast.makeText(getActivity(), "Connected", Toast.LENGTH_SHORT).show();
                     messageEditText.setEnabled(true);
+                    sendButton.setEnabled(true);
+
                     client.subscribe("helloChat", new Action2<ChannelError, Channel>() {
                         @Override
                         public void result(ChannelError channelError, Channel channel) {
@@ -246,7 +255,10 @@ public class ChatFragment extends Fragment implements AbsListView.OnItemClickLis
         client.disconnected(new Action<Void>() {
             @Override
             public void result(Void result) {
-                //getActivity().getActionBar().setTitle("DISCONNECTED");
+                messageEditText.setEnabled(false);
+                sendButton.setEnabled(false);
+                //Toast.makeText(getActivity(), "Diconnected", Toast.LENGTH_LONG).show();
+
             }
         });
     }

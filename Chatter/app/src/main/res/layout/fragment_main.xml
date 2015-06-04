@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:gravity="center"
-        android:padding="10dp"
+        android:padding="1dp"
         android:id="@+id/tvTitle" />
 
     <TextView
@@ -42,7 +42,6 @@
         android:id="@+id/buttonEnterChat"
         android:layout_below="@+id/etName"
         android:layout_centerHorizontal="true"
-        android:padding="10dp"
         />
 
 </RelativeLayout>
