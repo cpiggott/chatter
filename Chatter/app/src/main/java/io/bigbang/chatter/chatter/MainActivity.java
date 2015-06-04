@@ -103,6 +103,8 @@ public class MainActivity extends ActionBarActivity {
         private void OnEnterChatClick(){
             if(editTextName.equals("") || editTextName.length() < 1){
                 Toast.makeText(getActivity(), "Username must be longer than one character", Toast.LENGTH_SHORT).show();
+            } else if(editTextName.getText().toString().toLowerCase().equals("bobbot")){
+                Toast.makeText(getActivity(), "Invalid Username! BobBot is reserved!", Toast.LENGTH_SHORT).show();
             } else {
                 hideKeyboard();
                 Fragment newFragment = ChatFragment.newInstance(editTextName.getText().toString());

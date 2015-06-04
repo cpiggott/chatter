@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Vibrator;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -71,6 +72,8 @@ public class ChatFragment extends Fragment implements AbsListView.OnItemClickLis
     private Channel chatChannel;
     private BigBangClient client;
 
+    private Vibrator vibrator;
+
     // TODO: Rename and change types of parameters
     public static ChatFragment newInstance(String username) {
         ChatFragment fragment = new ChatFragment();
@@ -94,10 +97,11 @@ public class ChatFragment extends Fragment implements AbsListView.OnItemClickLis
         mMessages = new ArrayList<Message>();
         Resources resources = getResources();
 
-        mMessages.add(new Message("Welcome to the chat " + mUsername + "!", "ChatBot"));
+        //mMessages.add(new Message("Welcome to the chat " + mUsername + "!", "ChatBot"));
 
         // TODO: Change Adapter to display your content
         mAdapter = new MessageAdapter(getActivity(), mMessages, mUsername);
+        vibrator = (Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE);
 
 
     }
@@ -198,9 +202,19 @@ public class ChatFragment extends Fragment implements AbsListView.OnItemClickLis
         }
     }
 
+    private void SendConnect(){
+        JsonObject json = new JsonObject();
+        json.putString("message", mUsername + " has joined the chat.");
+        json.putString("sender", "BobBot");
+
+
+        chatChannel.publish(json);
+    }
+
     private void updateChatWindow(String message, String username){
         mAdapter.add(new Message(message, username));
         mAdapter.notifyDataSetChanged();
+        vibrator.vibrate(500);//TODO: Might want to move this
     }
 
     private void initializeChat() {
@@ -237,6 +251,7 @@ public class ChatFragment extends Fragment implements AbsListView.OnItemClickLis
                         @Override
                         public void result(ChannelError channelError, Channel channel) {
                             chatChannel = channel;
+                            SendConnect();
                             channel.onMessage(new Action<ChannelMessage>() {
                                 @Override
                                 public void result(ChannelMessage result) {
