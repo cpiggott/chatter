@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
@@ -66,6 +67,8 @@ public class ChatFragment extends Fragment implements AbsListView.OnItemClickLis
 
     private static String mUsername;
     private static int mColor;
+    private static double lat;
+    private static double lng;
 
     private String message;
     private EditText messageEditText;
@@ -77,10 +80,12 @@ public class ChatFragment extends Fragment implements AbsListView.OnItemClickLis
     private Vibrator vibrator;
 
     // TODO: Rename and change types of parameters
-    public static ChatFragment newInstance(String username, int color) {
+    public static ChatFragment newInstance(String username, int color, Location loc) {
         ChatFragment fragment = new ChatFragment();
         mUsername = username;
         mColor = color;
+        lat = loc.getLatitude();
+        lng = loc.getLongitude();
         Bundle args = new Bundle();
         fragment.setArguments(args);
         return fragment;
@@ -99,8 +104,6 @@ public class ChatFragment extends Fragment implements AbsListView.OnItemClickLis
 
         mMessages = new ArrayList<Message>();
         Resources resources = getResources();
-
-        //mMessages.add(new Message("Welcome to the chat " + mUsername + "!", "ChatBot"));
 
         // TODO: Change Adapter to display your content
         mAdapter = new MessageAdapter(getActivity(), mMessages, mUsername);
@@ -252,11 +255,13 @@ public class ChatFragment extends Fragment implements AbsListView.OnItemClickLis
                     Toast.makeText(getActivity(), "Connected", Toast.LENGTH_SHORT).show();
                     messageEditText.setEnabled(true);
                     sendButton.setEnabled(true);
-
-                    client.subscribe("helloChat", new Action2<ChannelError, Channel>() {
+                    final String geoHash = GeoHash.encode(lat, lng);
+                    client.subscribe(geoHash, new Action2<ChannelError, Channel>() {
                         @Override
                         public void result(ChannelError channelError, Channel channel) {
                             chatChannel = channel;
+                            Log.i("location", geoHash);
+                            //Toast.makeText(getActivity(), geoHash, Toast.LENGTH_LONG ).show();
                             SendConnect();
                             channel.onMessage(new Action<ChannelMessage>() {
                                 @Override

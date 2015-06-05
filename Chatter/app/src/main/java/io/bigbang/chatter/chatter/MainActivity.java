@@ -1,35 +1,34 @@
 package io.bigbang.chatter.chatter;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
-import android.os.Handler;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.os.Build;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+
+
 import java.util.Random;
 
-import io.bigbang.client.Action;
-import io.bigbang.client.AndroidBigBangClient;
-import io.bigbang.client.BigBangClient;
-import io.bigbang.client.ConnectionError;
 
-
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends ActionBarActivity  {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,14 +64,32 @@ public class MainActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
+
+
+
+
     /**
      * A placeholder fragment containing a simple view.
      */
-    public static class PlaceholderFragment extends Fragment {
+    public static class PlaceholderFragment extends Fragment  {
+
+
+        public static Location mLastKnownLocation;
+        boolean isLocationEnabled = false;
+        boolean isOkClicked = false;
+
+        private LocationManager locationManager;
+        private LocationListener locationListener;
+
 
         public PlaceholderFragment() {
         }
 
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+
+        }
 
         EditText editTextName;
         Button buttonEnterChat;
@@ -93,38 +110,110 @@ public class MainActivity extends ActionBarActivity {
                 }
             });
 
+            locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+
+            locationListener = new LocationListener() {
+                @Override
+                public void onLocationChanged(Location location) {
+                    if(mLastKnownLocation == null) {
+                        Toast.makeText(getActivity(), "Location aquired", Toast.LENGTH_SHORT).show();
+                    }
+
+                    mLastKnownLocation = location;
+
+
+                }
+
+                @Override
+                public void onStatusChanged(String provider, int status, Bundle extras) {
+
+                }
+
+                @Override
+                public void onProviderEnabled(String provider) {
+//                    Toast.makeText(getActivity(), "Getting location", Toast.LENGTH_SHORT).show();
+                    isLocationEnabled = true;
+                }
+
+                @Override
+                public void onProviderDisabled(String provider) {
+
+                    if(mLastKnownLocation == null && !isOkClicked) {
+                        AlertDialog.Builder alertBuilder = new AlertDialog.Builder(getActivity());
+                        String message = "Please enable location services. Press 'Ok' to go to the location setting page";
+
+                        alertBuilder.setMessage(message).setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                isOkClicked = true;
+                                Intent gpsOptionsIntent = new Intent(
+                                        android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                                startActivity(gpsOptionsIntent);
+                            }
+                        }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.cancel();
+                            }
+                        });
+                        alertBuilder.create().show();
+                    }
+
+
+
+                }
+            };
+
             return rootView;
         }
 
+        @Override
+        public void onStart() {
+            super.onStart();
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,0,0,locationListener);
+        }
+
+        @Override
+        public void onViewStateRestored(Bundle savedInstanceState) {
+            super.onViewStateRestored(savedInstanceState);
+        }
+
         /*
-        * @Name: OnEnterChatClick
-        *
-        * @params: None
-        * @return: None
-        *
-        * @Description: Called when the Enter Chat button is clicked. Opens a new fragment with the chat.
-        */
+                * @Name: OnEnterChatClick
+                *
+                * @params: None
+                * @return: None
+                *
+                * @Description: Called when the Enter Chat button is clicked. Opens a new fragment with the chat.
+                */
         private void OnEnterChatClick(){
 
+            if(mLastKnownLocation != null){
 
-            if(editTextName.equals("") || editTextName.length() < 1){
-                Toast.makeText(getActivity(), "Username must be longer than one character", Toast.LENGTH_SHORT).show();
-            } else if(editTextName.getText().toString().toLowerCase().equals("bobbot")){
-                Toast.makeText(getActivity(), "Invalid Username! BobBot is reserved!", Toast.LENGTH_SHORT).show();
+                if(editTextName.equals("") || editTextName.length() < 1){
+                    Toast.makeText(getActivity(), "Username must be longer than one character", Toast.LENGTH_SHORT).show();
+                } else if(editTextName.getText().toString().toLowerCase().equals("bobbot")){
+                    Toast.makeText(getActivity(), "Invalid Username! BobBot is reserved!", Toast.LENGTH_SHORT).show();
+                } else {
+                    Random r = new Random();
+                    hideKeyboard();
+                    Fragment newFragment = ChatFragment.newInstance(editTextName.getText().toString(), colors[r.nextInt(5)], mLastKnownLocation);
+                    FragmentManager manager = getActivity().getSupportFragmentManager();
+                    FragmentTransaction transaction = getFragmentManager().beginTransaction();
+                    transaction.replace(R.id.container, newFragment);
+                    transaction.addToBackStack("enter");
+                    manager.popBackStack();
+                    transaction.commit();
+                }
             } else {
-                Random r = new Random();
-                hideKeyboard();
-                Fragment newFragment = ChatFragment.newInstance(editTextName.getText().toString(), colors[r.nextInt(5)]);
-                FragmentManager manager = getActivity().getSupportFragmentManager();
-                FragmentTransaction transaction = getFragmentManager().beginTransaction();
-                transaction.replace(R.id.container, newFragment);
-                transaction.addToBackStack("enter");
-                manager.popBackStack();
-                transaction.commit();
+                if(!isLocationEnabled) {
+                    Toast.makeText(getActivity(), "Can't get location. Please enable Location", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getActivity(), "Still awaiting location, please try again!", Toast.LENGTH_SHORT).show();
+                }
             }
 
         }
-
 
 
         /**
@@ -139,5 +228,8 @@ public class MainActivity extends ActionBarActivity {
                 inputManager.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
             }
         }
+
+
+
     }
 }
