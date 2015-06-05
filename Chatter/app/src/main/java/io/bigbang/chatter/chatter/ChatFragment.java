@@ -223,7 +223,9 @@ public class ChatFragment extends Fragment implements AbsListView.OnItemClickLis
     private void updateChatWindow(String message, String username, int color){
         mAdapter.add(new Message(message, username, color));
         mAdapter.notifyDataSetChanged();
-        vibrator.vibrate(500);//TODO: Might want to move this
+        if(!username.equals(mUsername)){
+            vibrator.vibrate(500);//TODO: Might want to move this
+        }
     }
 
     private void initializeChat() {
