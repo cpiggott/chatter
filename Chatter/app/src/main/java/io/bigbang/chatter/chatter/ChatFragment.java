@@ -73,10 +73,10 @@ public class ChatFragment extends Fragment implements AbsListView.OnItemClickLis
     private String message;
     private EditText messageEditText;
     private Button sendButton;
+    private boolean needInitialized = true;
 
     private Channel chatChannel;
     private BigBangClient client;
-
     private Vibrator vibrator;
 
     // TODO: Rename and change types of parameters
@@ -169,13 +169,15 @@ public class ChatFragment extends Fragment implements AbsListView.OnItemClickLis
     @Override
     public void onResume() {
         super.onResume();
-        initializeChat();
+        if(needInitialized) {
+            initializeChat();
+        }
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        client.disconnect();
+       // client.disconnect();
 
     }
 
@@ -228,6 +230,13 @@ public class ChatFragment extends Fragment implements AbsListView.OnItemClickLis
         }
     }
 
+    /*
+    * This initializes the BigBand Client and subscribes you to a channel.
+    *
+    * Calls the GeoHash Encode function that puts you in a location based channel.
+    *
+    *
+    */
     private void initializeChat() {
 
         //getActivity().getActionBar().setTitle("Connecting...");
@@ -253,7 +262,7 @@ public class ChatFragment extends Fragment implements AbsListView.OnItemClickLis
                 } else {
                     Log.i("bigbang", "Connected!");
                     //getActivity().getActionBar().setTitle("Connected!");
-
+                    needInitialized = false;
                     Toast.makeText(getActivity(), "Connected", Toast.LENGTH_SHORT).show();
                     messageEditText.setEnabled(true);
                     sendButton.setEnabled(true);
@@ -283,8 +292,7 @@ public class ChatFragment extends Fragment implements AbsListView.OnItemClickLis
             public void result(Void result) {
                 messageEditText.setEnabled(false);
                 sendButton.setEnabled(false);
-                //Toast.makeText(getActivity(), "Diconnected", Toast.LENGTH_LONG).show();
-
+                needInitialized = true;
             }
         });
     }
