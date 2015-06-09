@@ -1,10 +1,12 @@
 package io.bigbang.chatter.chatter;
 
+import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -57,15 +59,14 @@ public class MainActivity extends ActionBarActivity  {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        if (id == R.id.action_exit) {
+            this.finish();
+            System.exit(0);
+
         }
 
         return super.onOptionsItemSelected(item);
     }
-
-
-
 
 
     /**
@@ -77,6 +78,7 @@ public class MainActivity extends ActionBarActivity  {
         public static Location mLastKnownLocation;
         boolean isLocationEnabled = false;
         boolean isOkClicked = false;
+        boolean isUserAsked = false;
 
         private LocationManager locationManager;
         private LocationListener locationListener;
@@ -138,7 +140,8 @@ public class MainActivity extends ActionBarActivity  {
                 @Override
                 public void onProviderDisabled(String provider) {
 
-                    if(mLastKnownLocation == null && !isOkClicked) {
+                    if(mLastKnownLocation == null && !isUserAsked) {
+                        isUserAsked = true;
                         AlertDialog.Builder alertBuilder = new AlertDialog.Builder(getActivity());
                         String message = "Please enable location services. Press 'Ok' to go to the location setting page";
 
@@ -207,7 +210,7 @@ public class MainActivity extends ActionBarActivity  {
                 }
             } else {
                 if(!isLocationEnabled) {
-                    Toast.makeText(getActivity(), "Can't get location. Please enable Location", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "Can't get location. Please make sure Location is enabled", Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(getActivity(), "Still awaiting location, please try again!", Toast.LENGTH_SHORT).show();
                 }

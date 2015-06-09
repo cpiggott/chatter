@@ -8,6 +8,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
@@ -29,10 +31,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import io.bigbang.client.Action;
 import io.bigbang.client.Action2;
@@ -82,6 +86,7 @@ public class ChatFragment extends Fragment implements AbsListView.OnItemClickLis
     private Button sendButton;
     private boolean needInitialized = true;
     private boolean notifyUser = false;
+    private String locale = "";
 
     private SimpleDateFormat sdm = new SimpleDateFormat("h:mm a");
 
@@ -216,7 +221,14 @@ public class ChatFragment extends Fragment implements AbsListView.OnItemClickLis
         message = messageEditText.getText().toString();
         if(message.equals("") || message == null){
             Toast.makeText(getActivity(), "Message cannot be empty", Toast.LENGTH_SHORT ).show();
-        } else {
+        } else if (message.toLowerCase().equals("!location")){
+            if(!locale.equals("")) {
+                Toast.makeText(getActivity(), "You are currently in the " + locale + " chat room", Toast.LENGTH_SHORT).show();
+                messageEditText.setText("");
+            } else {
+                Toast.makeText(getActivity(), "We weren't able to grab your location enough.", Toast.LENGTH_SHORT).show();
+            }
+        } else  {
 
             messageEditText.setText("");//Sets the editText to empty for a new message
 
@@ -233,7 +245,7 @@ public class ChatFragment extends Fragment implements AbsListView.OnItemClickLis
     //Sends a message that a specific user has connected to everyone.
     private void SendConnect(){
         JsonObject json = new JsonObject();
-        json.putString("message", mUsername + " has joined the chat.");
+        json.putString("message", mUsername + " has joined the " + locale + " chat.");
         json.putString("sender", "BobBot");
         json.putNumber("color", Color.BLACK);
         json.putString("date", sdm.format(new Date()));
@@ -300,6 +312,17 @@ public class ChatFragment extends Fragment implements AbsListView.OnItemClickLis
                     messageEditText.setEnabled(true);
                     sendButton.setEnabled(true);
                     final String geoHash = GeoHash.encode(lat, lng);
+                    Geocoder geoCoder = new Geocoder(getActivity(), Locale.getDefault());
+                    try{
+                        List<Address> list = geoCoder.getFromLocation(lat, lng, 1);
+                        if (list != null & list.size() > 0) {
+                            Address address = list.get(0);
+                            locale = address.getLocality();
+                        }
+
+                    } catch (IOException ex){
+                        ex.printStackTrace();
+                    }
                     client.subscribe(geoHash, new Action2<ChannelError, Channel>() {
                         @Override
                         public void result(ChannelError channelError, Channel channel) {

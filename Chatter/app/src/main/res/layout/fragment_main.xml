@@ -1,8 +1,6 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingTop="50dp"
-    android:paddingBottom="50dp"
     tools:context=".MainActivity$PlaceholderFragment">
 
     <TextView
@@ -11,6 +9,7 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:gravity="center"
+        android:paddingTop="15dp"
         android:padding="1dp"
         android:id="@+id/tvTitle" />
 
@@ -43,5 +42,7 @@
         android:layout_below="@+id/etName"
         android:layout_centerHorizontal="true"
         />
+
+
 
 </RelativeLayout>
