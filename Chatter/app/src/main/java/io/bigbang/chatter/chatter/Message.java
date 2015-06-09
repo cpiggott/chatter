@@ -9,13 +9,13 @@ import java.util.Date;
  */
 public class Message {
     private String body;
-    private Date date;
+    private String date;
     private String sender;
     private int color;
 
-    public Message(String messageBody, String sender, int color){
+    public Message(String messageBody, String sender, int color, String date){
         this.body = messageBody;
-        this.date = new Date();
+        this.date = date;
         this.sender = sender;
         this.color = color;
     }
@@ -36,7 +36,7 @@ public class Message {
         return this.sender;
     }
 
-    public Date getDate(){
+    public String getDate(){
         return this.date;
     }
 

@@ -35,6 +35,7 @@ public class MessageAdapter extends ArrayAdapter<Message> {
             viewHolder = new ViewHolder();
             viewHolder.tvBody = (TextView) convertView.findViewById(R.id.tvMessage);
             viewHolder.tvSender = (TextView) convertView.findViewById(R.id.tvName);
+            viewHolder.tvDate = (TextView) convertView.findViewById(R.id.tvDate);
             convertView.setTag(viewHolder);
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
@@ -45,8 +46,11 @@ public class MessageAdapter extends ArrayAdapter<Message> {
             convertView = inflater.inflate(R.layout.list_row_me, parent, false);
 
             viewHolder = new ViewHolder();
+
             viewHolder.tvBody = (TextView) convertView.findViewById(R.id.tvMessage);
             viewHolder.tvSender = (TextView) convertView.findViewById(R.id.tvName);
+            viewHolder.tvDate = (TextView) convertView.findViewById(R.id.tvDate);
+
             convertView.setTag(viewHolder);
         } else {
             LayoutInflater inflater = LayoutInflater.from(getContext());
@@ -56,12 +60,14 @@ public class MessageAdapter extends ArrayAdapter<Message> {
             viewHolder = new ViewHolder();
             viewHolder.tvBody = (TextView) convertView.findViewById(R.id.tvMessage);
             viewHolder.tvSender = (TextView) convertView.findViewById(R.id.tvName);
+            viewHolder.tvDate = (TextView) convertView.findViewById(R.id.tvDate);
             convertView.setTag(viewHolder);
         }
 
         viewHolder.tvSender.setTextColor(message.getColor());
         viewHolder.tvBody.setText(message.getBody());
         viewHolder.tvSender.setText(message.getSender());
+        viewHolder.tvDate.setText(message.getDate());
 
         return convertView;
 
@@ -78,6 +84,7 @@ public class MessageAdapter extends ArrayAdapter<Message> {
     private static class ViewHolder {
         TextView tvBody;
         TextView tvSender;
+        TextView tvDate;
     }
 
 

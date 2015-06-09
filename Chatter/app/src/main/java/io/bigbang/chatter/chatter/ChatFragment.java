@@ -1,7 +1,11 @@
 package io.bigbang.chatter.chatter;
 
 import android.app.Activity;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.location.Location;
@@ -9,6 +13,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,7 +29,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import io.bigbang.client.Action;
@@ -74,10 +81,14 @@ public class ChatFragment extends Fragment implements AbsListView.OnItemClickLis
     private EditText messageEditText;
     private Button sendButton;
     private boolean needInitialized = true;
+    private boolean notifyUser = false;
+
+    private SimpleDateFormat sdm = new SimpleDateFormat("h:mm a");
 
     private Channel chatChannel;
     private BigBangClient client;
     private Vibrator vibrator;
+    private NotificationCompat.Builder mBuilder;
 
     // TODO: Rename and change types of parameters
     public static ChatFragment newInstance(String username, int color, Location loc) {
@@ -135,6 +146,8 @@ public class ChatFragment extends Fragment implements AbsListView.OnItemClickLis
             }
         });
 
+        mBuilder = new NotificationCompat.Builder(getActivity());
+
         return view;
     }
 
@@ -169,6 +182,7 @@ public class ChatFragment extends Fragment implements AbsListView.OnItemClickLis
     @Override
     public void onResume() {
         super.onResume();
+        notifyUser = false;
         if(needInitialized) {
             initializeChat();
         }
@@ -178,6 +192,7 @@ public class ChatFragment extends Fragment implements AbsListView.OnItemClickLis
     public void onPause() {
         super.onPause();
        // client.disconnect();
+        notifyUser = true;
 
     }
 
@@ -194,6 +209,9 @@ public class ChatFragment extends Fragment implements AbsListView.OnItemClickLis
         }
     }
 
+    /**
+    *Sends the message to BigBang for the users
+    */
     private void SendMessage(){
         message = messageEditText.getText().toString();
         if(message.equals("") || message == null){
@@ -206,6 +224,7 @@ public class ChatFragment extends Fragment implements AbsListView.OnItemClickLis
             json.putString("message", message);
             json.putString("sender", mUsername);
             json.putNumber("color", mColor);
+            json.putString("date", sdm.format(new Date()));
 
             chatChannel.publish(json);
         }
@@ -217,16 +236,30 @@ public class ChatFragment extends Fragment implements AbsListView.OnItemClickLis
         json.putString("message", mUsername + " has joined the chat.");
         json.putString("sender", "BobBot");
         json.putNumber("color", Color.BLACK);
+        json.putString("date", sdm.format(new Date()));
 
 
         chatChannel.publish(json);
     }
 
-    private void updateChatWindow(String message, String username, int color){
-        mAdapter.add(new Message(message, username, color));
+    /**
+     * Creates a new message and updates the messageAdapter to add to the Chat View
+     *
+     * @param message : message that is to be added to list
+     * @param username : username of who sent the message
+     * @param color : color of the username that sent the messgae
+     * @param date : time the message was sent
+     */
+    private void updateChatWindow(String message, String username, int color, String date){
+        mAdapter.add(new Message(message, username, color, date));
         mAdapter.notifyDataSetChanged();
+
         if(!username.equals(mUsername)){
             vibrator.vibrate(500);//TODO: Might want to move this
+        }
+
+        if(notifyUser) {
+            Notify(username, message);
         }
     }
 
@@ -278,7 +311,7 @@ public class ChatFragment extends Fragment implements AbsListView.OnItemClickLis
                                 @Override
                                 public void result(ChannelMessage result) {
                                     JsonObject json = result.getPayload().getBytesAsJSON().asObject();
-                                    updateChatWindow(json.getString("message"), json.getString("sender"), json.getInteger("color"));
+                                    updateChatWindow(json.getString("message"), json.getString("sender"), json.getInteger("color"), json.getString("date"));
                                 }
                             });
                         }
@@ -295,6 +328,36 @@ public class ChatFragment extends Fragment implements AbsListView.OnItemClickLis
                 needInitialized = true;
             }
         });
+    }
+
+    /**
+     * This is only called if the application is not in the foregraound
+     *
+     * @param notificationTitle : title of the notification
+     * @param notificationMessage : message that was sent
+     */
+    @SuppressWarnings("depreciated")
+    private void Notify(String notificationTitle, String notificationMessage){
+        NotificationManager notificationManager = (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
+        Intent intent = new Intent(getActivity(), ChatFragment.class);
+        intent.putExtra("chatFragment", true);
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(getActivity(), 0, intent, 0);
+
+
+
+       mBuilder = new NotificationCompat.Builder(getActivity())
+                .setSmallIcon(R.drawable.abc_btn_radio_material)
+                .setContentTitle(notificationTitle)
+                .setContentText(notificationMessage);
+
+        Notification notification = mBuilder.build();
+
+        notification.flags = Notification.FLAG_AUTO_CANCEL;
+
+        notificationManager.notify(0,notification);
+
+
     }
 
 

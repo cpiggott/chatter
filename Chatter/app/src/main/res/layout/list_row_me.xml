@@ -20,17 +20,18 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/tvName"
         android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
         android:textColor="#000000"
         android:text="This is something that someone might say or something else"
         android:gravity="right"/>
 
     <!-- Date -->
-    <!--<TextView-->
-    <!--android:id="@+id/tvDate"-->
-    <!--android:layout_width="wrap_content"-->
-    <!--android:layout_height="wrap_content"-->
-    <!--android:layout_alignParentBottom="true"-->
-    <!--android:layout_alignParentRight="true"-->
-    <!--android:text="2:45PM "/>-->
+    <TextView
+        android:id="@+id/tvDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="2:45PM "
+        android:layout_below="@+id/tvMessage"
+        android:layout_alignEnd="@+id/tvMessage" />
 
 </RelativeLayout>
