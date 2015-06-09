@@ -60,8 +60,9 @@ import io.bigbang.protocol.JsonObject;
  */
 public class ChatFragment extends Fragment implements AbsListView.OnItemClickListener {
 
+    static final String STATE_MESSAGES = "messages";
 
-    private List<Message> mMessages;
+    private ArrayList<Message> mMessages;
 
     private OnFragmentInteractionListener mListener;
 
@@ -115,10 +116,23 @@ public class ChatFragment extends Fragment implements AbsListView.OnItemClickLis
     }
 
     @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putParcelableArrayList(STATE_MESSAGES, mMessages);
+        super.onSaveInstanceState(outState);
+
+
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mMessages = new ArrayList<Message>();
+        if(savedInstanceState != null){
+            mMessages = savedInstanceState.getParcelableArrayList(STATE_MESSAGES);
+        } else {
+            mMessages = new ArrayList<Message>();
+        }
+
         Resources resources = getResources();
 
         // TODO: Change Adapter to display your content
